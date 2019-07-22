@@ -1,0 +1,19 @@
+{
+    "name": "erickskrauch/composer-exclusive-install",
+    "type": "composer-plugin",
+    "require": {
+        "symfony/lock": "^4.3",
+        "composer-plugin-api": "^1.1"
+    },
+    "require-dev": {
+        "composer/composer": "^1.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "ErickSkrauch\\Composer\\ExclusiveInstall\\": "src"
+        }
+    },
+    "extra": {
+        "class": "ErickSkrauch\\Composer\\ExclusiveInstall\\Plugin"
+    }
+}
