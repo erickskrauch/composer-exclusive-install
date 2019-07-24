@@ -2,8 +2,9 @@
     "name": "erickskrauch/composer-exclusive-install",
     "type": "composer-plugin",
     "require": {
-        "symfony/lock": "^4.3",
-        "composer-plugin-api": "^1.1"
+        "php": ">=7.1.0",
+        "composer-plugin-api": "^1.1",
+        "symfony/lock": "^4.3"
     },
     "require-dev": {
         "composer/composer": "^1.8"
@@ -15,5 +16,8 @@
     },
     "extra": {
         "class": "ErickSkrauch\\Composer\\ExclusiveInstall\\Plugin"
+    },
+    "config": {
+        "sort-packages": true
     }
 }

@@ -7,33 +7,20 @@ use Composer\Composer;
 use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
+use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
+use Composer\Util\Filesystem;
+use Symfony\Component\Lock\Factory;
+use Symfony\Component\Lock\LockInterface;
+use Symfony\Component\Lock\Store\FlockStore;
 
 class Plugin implements PluginInterface, EventSubscriberInterface {
 
-    public function activate(Composer $composer, IOInterface $io): void {
-        // Leave empty
-        // TODO: add ability to ignore exclusive option
-    }
-
     /**
-     * Returns an array of event names this subscriber wants to listen to.
-     *
-     * The array keys are event names and the value can be:
-     *
-     * * The method name to call (priority defaults to 0)
-     * * An array composed of the method name to call and the priority
-     * * An array of arrays composed of the method names to call and respective
-     *   priorities, or 0 if unset
-     *
-     * For instance:
-     *
-     * * array('eventName' => 'methodName')
-     * * array('eventName' => array('methodName', $priority))
-     * * array('eventName' => array(array('methodName1', $priority), array('methodName2'))
-     *
-     * @return array The event names to listen to
+     * @var string
      */
+    private $lockDir;
+
     public static function getSubscribedEvents(): array {
         return [
             ScriptEvents::PRE_INSTALL_CMD => 'onPreInstall',
@@ -41,8 +28,27 @@ class Plugin implements PluginInterface, EventSubscriberInterface {
         ];
     }
 
-    public function onPreInstall($event) {
+    public function activate(Composer $composer, IOInterface $io): void {
+        $this->lockDir = $composer->getConfig()->get('vendor-dir');
 
+        $filesystem = new Filesystem();
+        $filesystem->ensureDirectoryExists($this->lockDir);
+    }
+
+    public function onPreInstall(Event $event): void {
+        $lock = $this->createLock();
+        $hasBeenAcquired = $lock->acquire();
+        if (!$hasBeenAcquired) {
+            $event->getIO()->write("<comment>Lock is already acquired by another process. Waiting until it'll be released.</comment>");
+            $lock->acquire(true);
+        }
+    }
+
+    private function createLock(): LockInterface {
+        $store = new FlockStore($this->lockDir);
+        $factory = new Factory($store);
+
+        return $factory->createLock('composer-exclusive-lock');
     }
 
 }
