@@ -2,6 +2,7 @@
     "name": "erickskrauch/composer-exclusive-install",
     "description": "A Composer plugin that prevents more than one install or update operation at a time.",
     "type": "composer-plugin",
+    "license": "MIT",
     "authors": [
         {
             "name": "ErickSkrauch",
